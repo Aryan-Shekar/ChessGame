@@ -1,2 +1,2 @@
 # ChessGame
-Chess Game
+Chess Game in python
