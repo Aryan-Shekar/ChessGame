@@ -44,7 +44,10 @@ pygame.display.set_caption("Chess Game")
 
 # Initialize chess board
 board = chess.Board()
-engine = chess.engine.SimpleEngine.popen_uci("stockfish")  # Ensure you have Stockfish installed
+
+# Specify the path to Stockfish engine
+engine_path = "/Users/aryanshekar/Documents/Python Projects/KyleChessGame/stockfish/stockfish-macos-m1-apple-silicon" # Replace this path with your own path, not this one
+engine = chess.engine.SimpleEngine.popen_uci(engine_path)
 
 # Function to draw the board
 def draw_board():
