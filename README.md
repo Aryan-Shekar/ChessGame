@@ -1,2 +1,2 @@
 # ChessGame
-Chess Game in python
+Chess Game in pygame vs stockfish
