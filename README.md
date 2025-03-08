@@ -103,3 +103,5 @@ Edit
 5. Click **File → Download as → Markdown (.md)** to save it as `README.md`.
 
 This README is now formatted properly and works in both **Jupyter Notebook** and **GitHub**! 🚀 Let me know if you need any refinements! 🎯♟️
+Here is a link to some slides about the project:
+https://docs.google.com/presentation/d/13eCGOtMv4up1590MPeG0IdN29ug3OfbY6y7-DBbjayc/edit?usp=sharing
