@@ -31,6 +31,7 @@ Ensure you have Python installed (version **3.8+ recommended**).
 Run the following command:
 ```sh
 pip install pygame python-chess
+```sh
 Step 2: Download Stockfish
 Download Stockfish from the official site:
 👉 Stockfish Download
