@@ -12,7 +12,8 @@ WIDTH, HEIGHT = 600, 600
 SQUARE_SIZE = WIDTH // 8
 WHITE = (240, 217, 181)
 BROWN = (181, 136, 99)
-GREEN = (0, 255, 0, 150)  # Transparent green for selection effect
+GREEN = (0, 255, 0, 100)  # Transparent green for selection effect
+RED = (255, 0, 0)  # Red for checkmate text
 
 # Directory containing the chess piece images
 image_dir = 'images'
@@ -43,6 +44,7 @@ for piece, filename in piece_images_files.items():
 # Setup screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Game")
+font = pygame.font.Font(None, 72)  # Font for checkmate text
 
 # Initialize chess board
 board = chess.Board()
@@ -52,79 +54,58 @@ engine_path = "/Users/aryanshekar/Documents/Python Projects/KyleChessGame/stockf
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
 
 selected_square = None
-selected_piece_symbol = None
-piece_position = None
+selected_piece = None
+moving_piece_pos = None
+player_color = chess.WHITE  # Player is always White
+
+def draw_checkmate():
+    text = font.render("CHECKMATE!", True, RED)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    time.sleep(3)  # Pause to display the message
 
 def draw_board():
     for row in range(8):
         for col in range(8):
             color = WHITE if (row + col) % 2 == 0 else BROWN
             pygame.draw.rect(screen, color, pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-    
-    # Draw green highlight if a piece is selected
-    if selected_square is not None:
-        highlight_surface = pygame.Surface((SQUARE_SIZE, SQUARE_SIZE), pygame.SRCALPHA)
-        highlight_surface.fill(GREEN)
-        screen.blit(highlight_surface, (chess.square_file(selected_square) * SQUARE_SIZE, (7 - chess.square_rank(selected_square)) * SQUARE_SIZE))
 
 def draw_pieces():
-    pieces_to_draw = []
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece:
             x = chess.square_file(square) * SQUARE_SIZE
             y = (7 - chess.square_rank(square)) * SQUARE_SIZE
-            pieces_to_draw.append((piece.symbol(), x, y, square))
-    
-    # Draw all pieces, ensuring captured pieces do not overlay the moving piece
-    for symbol, x, y, square in sorted(pieces_to_draw, key=lambda p: p[3] == selected_square):
-        screen.blit(piece_images[symbol], (x, y))
-
-def get_square(x, y):
-    row = y // SQUARE_SIZE
-    col = x // SQUARE_SIZE
-    return chess.square(col, 7 - row)
-
-def animate_move(start_pos, end_pos, piece):
-    frames = 10
-    delta_x = (end_pos[0] - start_pos[0]) / frames
-    delta_y = (end_pos[1] - start_pos[1]) / frames
-
-    for i in range(frames):
-        draw_board()
-        draw_pieces()
-        screen.blit(piece_images[piece], (start_pos[0] + delta_x * i, start_pos[1] + delta_y * i))
-        pygame.display.flip()
-        time.sleep(0.02)
+            screen.blit(piece_images[piece.symbol()], (x, y))
 
 def ai_move():
     result = engine.play(board, chess.engine.Limit(time=0.5))
     move = result.move
     board.push(move)
-
-def handle_mouse_down(pos):
-    global selected_square, selected_piece_symbol, piece_position
-    x, y = pos
-    square = get_square(x, y)
-    piece = board.piece_at(square)
-    if piece:
-        selected_square = square
-        selected_piece_symbol = piece.symbol()
+    draw_board()
+    draw_pieces()
+    pygame.display.flip()
+    if board.is_checkmate():
+        time.sleep(1)
+        draw_checkmate()
 
 def handle_mouse_up(pos):
-    global selected_square, selected_piece_symbol, piece_position
+    global selected_square, selected_piece
     if selected_square is not None:
         x, y = pos
-        new_square = get_square(x, y)
+        file = x // SQUARE_SIZE
+        rank = 7 - (y // SQUARE_SIZE)
+        new_square = chess.square(file, rank)
         move = chess.Move(selected_square, new_square)
         if move in board.legal_moves:
             board.push(move)
+            draw_board()
+            draw_pieces()
+            pygame.display.flip()
             ai_move()
         selected_square = None
-        selected_piece_symbol = None
-
-def handle_mouse_motion(pos):
-    pass
+        selected_piece = None
 
 running = True
 while running:
@@ -136,11 +117,16 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            handle_mouse_down(event.pos)
+            x, y = event.pos
+            file = x // SQUARE_SIZE
+            rank = 7 - (y // SQUARE_SIZE)
+            square = chess.square(file, rank)
+            piece = board.piece_at(square)
+            if piece and piece.color == player_color:
+                selected_square = square
+                selected_piece = piece.symbol()
         elif event.type == pygame.MOUSEBUTTONUP:
             handle_mouse_up(event.pos)
-        elif event.type == pygame.MOUSEMOTION:
-            handle_mouse_motion(event.pos)
 
 engine.quit()
 pygame.quit()
