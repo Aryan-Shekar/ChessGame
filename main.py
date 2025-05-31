@@ -50,7 +50,7 @@ font = pygame.font.Font(None, 72)  # Font for checkmate text
 board = chess.Board()
 
 # Specify the path to Stockfish engine
-engine_path = "/Users/aryanshekar/Documents/Python Projects/KyleChessGame/stockfish/stockfish-macos-m1-apple-silicon"
+engine_path = "directory"
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
 
 selected_square = None
